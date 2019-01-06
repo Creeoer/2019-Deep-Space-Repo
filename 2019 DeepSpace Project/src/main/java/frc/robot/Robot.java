@@ -10,14 +10,15 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends IterativeRobot {
+  DifferentialDrive myRobot;
 
 
   @Override
   public void robotInit() {
+    myRobot = new DifferentialDrive(driveL, driveR);
   }
 
 
