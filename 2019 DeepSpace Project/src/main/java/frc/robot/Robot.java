@@ -18,9 +18,7 @@ public class Robot extends IterativeRobot {
   DifferentialDrive myRobot;
   Joystick stickL, stickR;
   Talon d1, d2, d3, d4;
-  Actuator lift1, lift2, lift3, lift4;
   
-
   @Override
   public void robotInit() {
     myRobot = new DifferentialDrive(driveL, driveR);
@@ -50,6 +48,7 @@ public class Robot extends IterativeRobot {
 
   @Override
   public void teleopPeriodic() {
+    myRobot.tankDrive(stickL.getY(), stickR.getY());
   }
 
   @Override
