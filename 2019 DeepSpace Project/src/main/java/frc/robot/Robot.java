@@ -8,21 +8,19 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Actuator;
+
+@SuppressWarnings( "deprecation" )
 
 public class Robot extends IterativeRobot {
   DifferentialDrive myRobot;
   Joystick stickL, stickR;
   Talon d1, d2, d3, d4;
-  Actuator a1, a2;
   
   @Override
   public void robotInit() {
-    myRobot = new DifferentialDrive(driveL, driveR);
     d1 = new Talon(0);
     d2 = new Talon(1);
     d3 = new Talon(3);
