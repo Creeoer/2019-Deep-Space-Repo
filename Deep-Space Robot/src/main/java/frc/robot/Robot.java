@@ -28,6 +28,8 @@ import edu.wpi.cscore.UsbCamera;
  * creating this project, you must also update the build.gradle file in the
  * project.
  */
+
+@SuppressWarnings( "deprecation" )
 public class Robot extends IterativeRobot {
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -124,6 +126,17 @@ public class Robot extends IterativeRobot {
   @Override
   public void teleopPeriodic() {
     myRobot.tankDrive(stickL.getY(), stickR.getY());
+    
+    while(stickL.getTrigger()){
+      double centerX;
+
+      synchronized(imgLock){
+        centerX = this.centerX;
+      }
+      
+      double turn = centerX - (IMG_WIDTH /2);
+      myRobot.arcadeDrive(-0.6, turn * 0.005);
+    }
   }
 
   /**
