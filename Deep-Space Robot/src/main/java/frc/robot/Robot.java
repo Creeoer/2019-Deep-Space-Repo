@@ -36,8 +36,10 @@ public class Robot extends IterativeRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private Joystick stickL, stickR;
+  private TalonSRX drive1, drive2, drive3, drive4;
+  private VictorSPX lift1, lift2, arm, ramp1, ramp2;
   private DifferentialDrive myRobot;
-
+  private SpeedControllerGroup driveL, driveR;
   //Vision Code
   private static final int IMG_WIDTH = 600;
   private static final int IMG_HEIGHT = 450;
@@ -57,6 +59,18 @@ public class Robot extends IterativeRobot {
     SmartDashboard.putData("Auto choices", m_chooser);
     stickL = new Joystick(0);
     stickR = new Joystick(1);
+    drive1 = new TalonSRX(0);
+    drive2 = new TalonSRX(1);
+    drive3 = new TalonSRX(2);
+    drive4 = new TalonSRX(3);
+    lift1 = new VictorSPX(4);
+    lift2 = new VictorSPX(5);
+    arm = new VictorSPX(6);
+    ramp1 = new VictorSPX(7);
+    ramp2 = new VictorSPX(8);
+    driveL = new SpeedControllerGroup(drive1, drive2);
+    driveR = new SpeedControllerGroup(drive3, drive4);
+    myRobot = new DifferntialDrive(driveL, driveR);
 
     //Vision Code
     UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture();
