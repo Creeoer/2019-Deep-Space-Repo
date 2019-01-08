@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import com.ctre.phoenix.motorcontrol.can.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -32,7 +31,6 @@ public class Robot extends IterativeRobot {
   private Talon d1, d2, d3, d4;
   private DifferentialDrive myRobot;
   private SpeedControllerGroup driveL, driveR;
-  private CANTalon talon1;
   private boolean isShooterOn;
 
   /**
