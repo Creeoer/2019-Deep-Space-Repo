@@ -14,7 +14,13 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-
+import com.ctre.phoenix.motorcontrol.can.*;
+//Vision Code
+import frc.robot.MyVisionPipeline;
+import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.vision.VisionRunner;
+import edu.wpi.first.wpilibj.vision.VisionThread;
+import edu.wpi.cscore.UsbCamera;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -28,10 +34,15 @@ public class Robot extends IterativeRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private Joystick stickL, stickR;
-  private Talon d1, d2, d3, d4;
   private DifferentialDrive myRobot;
-  private SpeedControllerGroup driveL, driveR;
-  private boolean isShooterOn;
+
+  //Vision Code
+  private static final int IMG_WIDTH = 600;
+  private static final int IMG_HEIGHT = 450;
+
+  private VisionThread visionThread;
+  private double centerX = 0;
+  private final Object imgLock = new Object();
 
   /**
    * This function is run when the robot is first started up and should be
@@ -45,16 +56,19 @@ public class Robot extends IterativeRobot {
     stickL = new Joystick(0);
     stickR = new Joystick(1);
 
-    d1 = new Talon(0);
-    d2 = new Talon(1);
-    d3 = new Talon(2);
-    d4 = new Talon(3);
-    shooter = new Victor(5);
-    driveL = new SpeedControllerGroup(d1, d2);
-    driveR = new SpeedControllerGroup(d3, d4);
+    //Vision Code
+    UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture();
+    camera1.setResolution(IMG_WIDTH,IMG_HEIGHT);
 
-    myRobot = new DifferentialDrive(driveL, driveR);
-
+    visionThread = new VisionThread(camera1, new MyVisionPipeline(), pipeline -> {
+      if(!pipeline.filterContoursOutput().isEmpty() {
+        Rect r = Imgproc.boundingRect(pipeline.filterContoursOutput().get(0));
+        synchronized(imgLock){
+          centerX = r.x (r.width /2);
+        }
+      }
+    });
+    visionThread.start();
   }
 
   /**
