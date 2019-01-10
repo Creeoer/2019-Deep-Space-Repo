@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import com.ctre.phoenix.motorcontrol.can.*;
 //Vision Code
@@ -21,6 +22,8 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.vision.VisionRunner;
 import edu.wpi.first.wpilibj.vision.VisionThread;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.AnalogInput;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -39,9 +42,10 @@ public class Robot extends IterativeRobot {
   private WPI_TalonSRX drive1, drive2, drive3, drive4;
   private WPI_VictorSPX lift1, lift2, arm, ramp1, ramp2;
   private DifferentialDrive myRobot;
-  private SpeedControllerGroup driveL, driveR;
-
-
+  private SpeedControllerGroup driveL, driveR, lifts;
+  private Potentiometer pot;
+  private Boolean isLiftOn;
+  
   //Vision Code
   private static final int IMG_WIDTH = 600;
   private static final int IMG_HEIGHT = 450;
@@ -49,11 +53,7 @@ public class Robot extends IterativeRobot {
   private VisionThread visionThread;
   private double centerX = 0;
   private final Object imgLock = new Object();
-
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
+  
   @Override
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
@@ -73,6 +73,7 @@ public class Robot extends IterativeRobot {
     driveL = new SpeedControllerGroup(drive1, drive2);
     driveR = new SpeedControllerGroup(drive3, drive4);
     myRobot = new DifferentialDrive(driveL, driveR);
+    lifts = new SpeedControllerGroup(lift1, lift2);
 
     //Vision Code
     UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture();
@@ -142,7 +143,29 @@ public class Robot extends IterativeRobot {
   @Override
   public void teleopPeriodic() {
     myRobot.tankDrive(stickL.getY(), stickR.getY());
-    
+
+    Lifts();
+    TargetLocker();
+  }
+  @Override
+  public void testPeriodic() {
+  }
+
+  public void Lifts(){
+    //Actuators
+    if(stickL.getRawButton(5) && !isLiftOn){
+      //Up
+      isLiftOn = true;
+      lifts.set(3);
+    }
+    else if(stickL.getRawButton(6)){
+      //Down
+      isLiftOn = true;
+      lifts.set(-3);
+    }
+  }
+
+  public void TargetLocker(){
     while(stickL.getTrigger()){
       double centerX;
 
@@ -153,12 +176,5 @@ public class Robot extends IterativeRobot {
       double turn = centerX - (IMG_WIDTH /2);
       myRobot.arcadeDrive(-0.6, turn * 0.005);
     }
-  }
-
-  /**
-   * This function is called periodically during test mode.
-   */
-  @Override
-  public void testPeriodic() {
   }
 }
