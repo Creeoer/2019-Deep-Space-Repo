@@ -1,35 +1,25 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
+
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import com.ctre.phoenix.motorcontrol.can.*;
-//Vision Code
-import frc.robot.MyVisionPipeline;
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.vision.VisionRunner;
 import edu.wpi.first.wpilibj.vision.VisionThread;
-import edu.wpi.cscore.UsbCamera;
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the IterativeRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the build.gradle file in the
- * project.
- */
 
-@SuppressWarnings( "deprecation" )
+@SuppressWarnings("deprecation")
 public class Robot extends IterativeRobot {
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
@@ -40,6 +30,7 @@ public class Robot extends IterativeRobot {
   private WPI_VictorSPX lift1, lift2, arm, ramp1, ramp2;
   private DifferentialDrive myRobot;
   private SpeedControllerGroup driveL, driveR;
+  private Potentiometer pot;
 
 
   //Vision Code
@@ -74,19 +65,16 @@ public class Robot extends IterativeRobot {
     driveR = new SpeedControllerGroup(drive3, drive4);
     myRobot = new DifferentialDrive(driveL, driveR);
 
+    pot = new AnalogPotentiometer(0, 360, 30);
+    AnalogInput ai = new AnalogInput(1);
+    pot = new AnalogPotentiometer(ai, 360, 30);
+
     //Vision Code
     UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture();
     camera1.setResolution(IMG_WIDTH,IMG_HEIGHT);
 
-    visionThread = new VisionThread(camera1, new MyVisionPipeline(), pipeline -> {
-      if(!pipeline.filterContoursOutput().isEmpty() {
-        Rect r = Imgproc.boundingRect(pipeline.filterContoursOutput().get(0));
-        synchronized(imgLock){
-          centerX = r.x (r.width /2);
-        }
-      }
-    });
-    visionThread.start();
+
+
   }
 
   /**
@@ -143,22 +131,29 @@ public class Robot extends IterativeRobot {
   public void teleopPeriodic() {
     myRobot.tankDrive(stickL.getY(), stickR.getY());
     
-    while(stickL.getTrigger()){
-      double centerX;
-
-      synchronized(imgLock){
-        centerX = this.centerX;
-      }
+    cameraCode();
       
-      double turn = centerX - (IMG_WIDTH /2);
-      myRobot.arcadeDrive(-0.6, turn * 0.005);
     }
-  }
-
   /**
    * This function is called periodically during test mode.
    */
   @Override
   public void testPeriodic() {
   }
-}
+
+//This is the camera code from GRIP.
+public void cameraCode(){
+  while(stickL.getTrigger()){
+    double centerX;
+
+    synchronized(imgLock){
+      centerX = this.centerX;
+    }
+    
+    double turn = centerX - (IMG_WIDTH /2);
+    myRobot.arcadeDrive(-0.6, turn * 0.005);
+  }
+  double degrees = pot.get();
+
+  if(degrees > 80){
+}}};
