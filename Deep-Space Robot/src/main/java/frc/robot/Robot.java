@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.vision.VisionThread;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.AnalogInput;
+import frc.robot.functions.Timer;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -45,6 +46,7 @@ public class Robot extends IterativeRobot {
   private SpeedControllerGroup driveL, driveR, lifts;
   private Potentiometer pot;
   private Boolean isLiftOn;
+  private Timer timer;
   
   //Vision Code
   private static final int IMG_WIDTH = 600;
@@ -59,6 +61,7 @@ public class Robot extends IterativeRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    timer = new Timer();
     stickL = new Joystick(0);
     stickR = new Joystick(1);
     drive1 = new WPI_TalonSRX(0);
@@ -146,6 +149,7 @@ public class Robot extends IterativeRobot {
 
     Lifts();
     TargetLocker();
+    IHatePotentiometer();
   }
   @Override
   public void testPeriodic() {
@@ -176,5 +180,9 @@ public class Robot extends IterativeRobot {
       double turn = centerX - (IMG_WIDTH /2);
       myRobot.arcadeDrive(-0.6, turn * 0.005);
     }
+  }
+
+  public void IHatePotentiometer(){
+    
   }
 }
