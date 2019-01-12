@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import edu.wpi.first.wpilibj.Timer;
 
 @SuppressWarnings("deprecation")
 
@@ -16,9 +15,10 @@ public class Robot extends IterativeRobot {
     private WPI_VictorSPX ramp, arm, actuator1, actuator2, door;
     private SpeedControllerGroup driveL, driveR;
     private DifferentialDrive myRobot;
-    private boolean isRampOn, areArmsOn, areRampsOn, isLiftOpen, areDoorsOpen;
+    private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen;
 
     public void robotInit(){
+        myRobot = new DifferentialDrive(driveL, driveR);
         stickL = new Joystick(0);
         stickR = new Joystick(1);
 
@@ -26,10 +26,10 @@ public class Robot extends IterativeRobot {
         drive2 = new WPI_TalonSRX(2);
         drive3 = new WPI_TalonSRX(3);
         drive4 = new WPI_TalonSRX(4);
-        ramp = new WPI_VictorSPX(5);
-        arm = new WPI_VictorSPX(6);
-        actuator1 = new WPI_VictorSPX(7);
-        actuator2 = new WPI_VictorSPX(8);
+        ramp = new WPI_VictorSPX(7);
+        arm = new WPI_VictorSPX(8);
+        actuator1 = new WPI_VictorSPX(5);
+        actuator2 = new WPI_VictorSPX(6);
         door = new WPI_VictorSPX(9);
 
         driveL = new SpeedControllerGroup(drive1, drive2);
@@ -50,10 +50,10 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic(){
         myRobot.tankDrive(stickL.getY(), stickR.getY());
         ramp();
-        
         arms();
         actuators();
         lifts();
+        door();
     }
 
     @Override
@@ -100,12 +100,7 @@ public class Robot extends IterativeRobot {
     }
 
     public void door(){
-        if(stickR.getRawButton(6) && !areDoorsOpen){
-            door.set(3);
-        }
-        else if(stickR.getRawButton(4) && !areDoorsOpen){
-            door.set(-3);
-        }
+        
     }
 }
 
