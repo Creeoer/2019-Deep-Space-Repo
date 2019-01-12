@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.cscore.UsbCamera;
 
 @SuppressWarnings("deprecation")
 
@@ -16,6 +18,7 @@ public class Robot extends IterativeRobot {
     private SpeedControllerGroup driveL, driveR;
     private DifferentialDrive myRobot;
     private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen;
+    private UsbCamera camera1, camera2;
 
     public void robotInit(){
         myRobot = new DifferentialDrive(driveL, driveR);
@@ -34,6 +37,8 @@ public class Robot extends IterativeRobot {
 
         driveL = new SpeedControllerGroup(drive1, drive2);
         driveR = new SpeedControllerGroup(drive3, drive4);
+        camera1 = CameraServer.getInstance().startAutomaticCapture();
+        camera2 = CameraServer.getInstance().startAutomaticCapture();
     }
 
     @Override
