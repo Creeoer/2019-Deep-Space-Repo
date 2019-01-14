@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.cscore.UsbCamera;
 
@@ -15,15 +16,20 @@ public class Robot extends IterativeRobot {
     private Joystick stickL, stickR;
     private WPI_TalonSRX drive1, drive2, drive3, drive4;
     private WPI_VictorSPX ramp, arm, actuator1, actuator2, door;
+    private Spark light;
     private SpeedControllerGroup driveL, driveR;
     private DifferentialDrive myRobot;
-    private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen;
-    private UsbCamera camera1, camera2;
+    private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen, lightOn;
 
     public void robotInit(){
         myRobot = new DifferentialDrive(driveL, driveR);
         stickL = new Joystick(0);
         stickR = new Joystick(1);
+
+        isRampOn = false;
+        areArmsOn = false;
+        isLiftOpen = false;
+        areDoorsOpen = false;
 
         drive1 = new WPI_TalonSRX(1);
         drive2 = new WPI_TalonSRX(2);
@@ -34,11 +40,12 @@ public class Robot extends IterativeRobot {
         actuator1 = new WPI_VictorSPX(5);
         actuator2 = new WPI_VictorSPX(6);
         door = new WPI_VictorSPX(9);
+        light = new Spark(0);
 
         driveL = new SpeedControllerGroup(drive1, drive2);
         driveR = new SpeedControllerGroup(drive3, drive4);
-        camera1 = CameraServer.getInstance().startAutomaticCapture();
-        camera2 = CameraServer.getInstance().startAutomaticCapture();
+        CameraServer.getInstance().startAutomaticCapture(0);
+        CameraServer.getInstance().startAutomaticCapture(1);
     }
 
     @Override
@@ -59,6 +66,7 @@ public class Robot extends IterativeRobot {
         actuators();
         lifts();
         door();
+        light();
     }
 
     @Override
@@ -66,24 +74,33 @@ public class Robot extends IterativeRobot {
 
     }
 
+    public void light(){
+        if(stickL.getRawButton(10) && lightOn == false){
+            lightOn = true;
+            light.set(1);
+        }else if(stickL.getRawButton(10) && lightOn == true){
+            light.set(0); 
+            lightOn = false;
+        }
+    }
     public void ramp(){
-        if(stickL.getRawButton(3) && !isRampOn){
+.        if(stickL.getRawButton(3) && !isRampOn){
             isRampOn = true;
             ramp.set(4);
         }
-        else if(stickL.getRawButton(2) && !isRampOn){
-            isRampOn = true;
+        else if(stickL.getRawButton(3) && isRampOn){
+            isRampOn = false;
             ramp.set(-4);
         }
     }
 
     public void arms(){
         if(stickL.getRawButton(5) && !areArmsOn){
-            areArmsOn = true;
+            areArmsOn = false;
             arm.set(2);
         }
-        else if(stickL.getRawButton(4) && !areArmsOn){
-            areArmsOn = true;
+        else if(stickL.getRawButton(4) && areArmsOn){
+            areArmsOn = false;
             arm.set(-2);
         }
     }
@@ -108,4 +125,3 @@ public class Robot extends IterativeRobot {
         
     }
 }
-
