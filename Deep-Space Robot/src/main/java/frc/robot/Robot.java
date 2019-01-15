@@ -9,16 +9,22 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.Servo;
+import frc.robot.functions.Timer;
 
 @SuppressWarnings("deprecation")
 
 public class Robot extends IterativeRobot {
     private Joystick stickL, stickR;
     private WPI_TalonSRX drive1, drive2, drive3, drive4;
-    private WPI_VictorSPX ramp, arm, actuator1, actuator2, door;
+    private WPI_VictorSPX ramp, arm, actuator1, actuator2;
     private Spark light;
+    private Servo door;
     private SpeedControllerGroup driveL, driveR;
     private DifferentialDrive myRobot;
+    private Timer timer;
+
+    private double delay = 100.0;
     private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen, lightOn;
 
     public void robotInit(){
@@ -39,11 +45,12 @@ public class Robot extends IterativeRobot {
         arm = new WPI_VictorSPX(8);
         actuator1 = new WPI_VictorSPX(5);
         actuator2 = new WPI_VictorSPX(6);
-        door = new WPI_VictorSPX(9);
+        door = new Servo(1);
         light = new Spark(0);
-
         driveL = new SpeedControllerGroup(drive1, drive2);
         driveR = new SpeedControllerGroup(drive3, drive4);
+
+        timer = new Timer();
         CameraServer.getInstance().startAutomaticCapture(0);
         CameraServer.getInstance().startAutomaticCapture(1);
     }
@@ -84,7 +91,7 @@ public class Robot extends IterativeRobot {
         }
     }
     public void ramp(){
-.        if(stickL.getRawButton(3) && !isRampOn){
+        if(stickL.getRawButton(3) && !isRampOn){
             isRampOn = true;
             ramp.set(4);
         }
@@ -99,7 +106,7 @@ public class Robot extends IterativeRobot {
             areArmsOn = false;
             arm.set(2);
         }
-        else if(stickL.getRawButton(4) && areArmsOn){
+        else if(stickL.getRawButton(5) && areArmsOn){
             areArmsOn = false;
             arm.set(-2);
         }
@@ -122,6 +129,30 @@ public class Robot extends IterativeRobot {
     }
 
     public void door(){
-        
+      if(stickL.getRawButton(10) && !areDoorsOpen){
+        areDoorsOpen = false;
+        door.set(4);
+        timer.start();
+        if(timer.get() > delay){
+          door.set(-1);
+          timer.reset();
+          if(timer.get() > 15){
+            door.set(0);
+            timer.stop();
+          }
+        }
+      }else if(stickL.getRawButton(10) && areDoorsOpen){
+        areDoorsOpen = false;
+        door.set(-4);
+        timer.start();
+        if(timer.get() > delay){
+          door.set(-1);
+          timer.reset();
+          if(timer.get() > 15){
+            door.set(0);
+            timer.stop();
+          }
+        }
+      }
     }
 }

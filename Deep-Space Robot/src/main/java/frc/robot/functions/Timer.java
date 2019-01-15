@@ -23,7 +23,7 @@ public class Timer {
         return RobotController.getFPGATime() / 1000.0;
     }
 
-    private synchronized double get() {
+    public synchronized double get() {
         if(m_running){
             return m_accumulatedTime + (getMsClock() - m_startTime) / 1000.0;
         } else {
