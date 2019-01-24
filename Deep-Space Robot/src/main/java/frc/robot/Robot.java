@@ -62,7 +62,6 @@ public class Robot extends IterativeRobot {
 
     @Override
     public void autonomousInit(){
-
     }
 
     @Override
@@ -70,7 +69,6 @@ public class Robot extends IterativeRobot {
         myRobot.tankDrive(stickL.getY(), stickR.getY());
         ramp();
         arms();
-        actuators();
         lifts();
         door();
         light();
@@ -82,46 +80,42 @@ public class Robot extends IterativeRobot {
     }
 
     public void light(){
-        if(stickL.getRawButton(10) && lightOn == false){
+        if(stickL.getRawButton(6) && lightOn == false){
             lightOn = true;
             light.set(1);
-        }else if(stickL.getRawButton(10) && lightOn == true){
+        }else if(stickL.getRawButton(6) && lightOn == true){
             light.set(0); 
             lightOn = false;
         }
     }
     public void ramp(){
-        if(stickL.getRawButton(3) && !isRampOn){
+        if(stickL.getRawButton(5) && !isRampOn){
             isRampOn = true;
             ramp.set(4);
         }
-        else if(stickL.getRawButton(3) && isRampOn){
+        else if(stickL.getRawButton(5) && isRampOn){
             isRampOn = false;
             ramp.set(-4);
         }
     }
 
     public void arms(){
-        if(stickL.getRawButton(5) && !areArmsOn){
+        if(stickR.getRawButton(6) && !areArmsOn){
             areArmsOn = false;
             arm.set(2);
         }
-        else if(stickL.getRawButton(5) && areArmsOn){
+        else if(stickR.getRawButton(4) && !areArmsOn){
             areArmsOn = false;
             arm.set(-2);
         }
     }
-
-    public void actuators(){
-    }
-
     public void lifts(){
-        if(stickR.getRawButton(5) && !isLiftOpen){
+        if(stickR.getRawButton(3) && !isLiftOpen){
             isLiftOpen = true;
             actuator1.set(3);
             actuator2.set(3);
         }
-        else if(stickR.getRawButton(3) && !isLiftOpen){
+        else if(stickR.getRawButton(2) && !isLiftOpen){
             isLiftOpen = true;
             actuator1.set(-3);
             actuator2.set(-3);
@@ -129,7 +123,7 @@ public class Robot extends IterativeRobot {
     }
 
     public void door(){
-      if(stickL.getRawButton(10) && !areDoorsOpen){
+      if(stickL.getRawButton(4) && !areDoorsOpen){
         areDoorsOpen = false;
         door.set(4);
         timer.start();
@@ -141,7 +135,7 @@ public class Robot extends IterativeRobot {
             timer.stop();
           }
         }
-      }else if(stickL.getRawButton(10) && areDoorsOpen){
+      }else if(stickL.getRawButton(4) && areDoorsOpen){
         areDoorsOpen = false;
         door.set(-4);
         timer.start();
