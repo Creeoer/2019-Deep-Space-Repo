@@ -2,13 +2,13 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.NidecBrushless;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Servo;
 import frc.robot.functions.Timer;
 
@@ -23,12 +23,13 @@ public class Robot extends IterativeRobot {
     private SpeedControllerGroup driveL, driveR;
     private DifferentialDrive myRobot;
     private Timer timer;
+    private NidecBrushless nidec1;
 
     private double delay = 100.0;
+    private double brushlessValue;
     private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen, lightOn;
 
     public void robotInit(){
-        myRobot = new DifferentialDrive(driveL, driveR);
         stickL = new Joystick(0);
         stickR = new Joystick(1);
 
@@ -49,10 +50,13 @@ public class Robot extends IterativeRobot {
         light = new Spark(0);
         driveL = new SpeedControllerGroup(drive1, drive2);
         driveR = new SpeedControllerGroup(drive3, drive4);
+        nidec1 = new NidecBrushless(9, 9);
 
         timer = new Timer();
         CameraServer.getInstance().startAutomaticCapture(0);
         CameraServer.getInstance().startAutomaticCapture(1);
+
+        myRobot = new DifferentialDrive(driveL, driveR);
     }
 
     @Override
@@ -72,6 +76,7 @@ public class Robot extends IterativeRobot {
         lifts();
         door();
         light();
+        brushlessMotors();
     }
 
     @Override
@@ -110,12 +115,12 @@ public class Robot extends IterativeRobot {
         }
     }
     public void lifts(){
-        if(stickR.getRawButton(3) && !isLiftOpen){
+        if(stickR.getRawButton(5) && !isLiftOpen){
             isLiftOpen = true;
             actuator1.set(3);
             actuator2.set(3);
         }
-        else if(stickR.getRawButton(2) && !isLiftOpen){
+        else if(stickR.getRawButton(3) && !isLiftOpen){
             isLiftOpen = true;
             actuator1.set(-3);
             actuator2.set(-3);
@@ -148,5 +153,15 @@ public class Robot extends IterativeRobot {
           }
         }
       }
+    }
+
+    public void brushlessMotors(){
+        if(stickR.getRawButton(2)){
+            if(brushlessValue == 0){
+                nidec1.disable();
+            } else {
+                nidec1.set(brushlessValue);
+            }
+        }
     }
 }
