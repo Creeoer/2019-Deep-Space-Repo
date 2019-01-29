@@ -11,6 +11,12 @@ import edu.wpi.first.wpilibj.Servo;
 import frc.robot.functions.Timer;
 import edu.wpi.cscore.UsbCamera;
 
+
+/*TODO:
+ - Fix Drive
+ - Test Others
+ - Config CAN
+*/
 @SuppressWarnings("deprecation")
 
 public class Robot extends IterativeRobot {
