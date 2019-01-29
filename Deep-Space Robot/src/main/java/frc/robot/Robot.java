@@ -2,15 +2,14 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.NidecBrushless;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Servo;
 import frc.robot.functions.Timer;
+import edu.wpi.cscore.UsbCamera;
 
 @SuppressWarnings("deprecation")
 
@@ -18,20 +17,21 @@ public class Robot extends IterativeRobot {
     private Joystick stickL, stickR;
     private WPI_TalonSRX drive1, drive2, drive3, drive4;
     private WPI_VictorSPX ramp, arm, actuator1, actuator2;
-    private Spark light;
     private Servo door;
     private SpeedControllerGroup driveL, driveR;
     private DifferentialDrive myRobot;
     private Timer timer;
-    private NidecBrushless nidec1;
+    private UsbCamera camera1, camera2;
 
     private double delay = 100.0;
-    private double brushlessValue;
-    private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen, lightOn;
+    private boolean isRampOn, areArmsOn, isLiftOpen, areDoorsOpen;
 
     public void robotInit(){
-        stickL = new Joystick(0);
-        stickR = new Joystick(1);
+        //Attack on Port 1
+        //Extreme 3D Pro on Port 2
+        stickL = new Joystick(1);
+        stickR = new Joystick(2);
+        timer = new Timer();
 
         isRampOn = false;
         areArmsOn = false;
@@ -42,19 +42,20 @@ public class Robot extends IterativeRobot {
         drive2 = new WPI_TalonSRX(2);
         drive3 = new WPI_TalonSRX(3);
         drive4 = new WPI_TalonSRX(4);
+
         ramp = new WPI_VictorSPX(7);
         arm = new WPI_VictorSPX(8);
-        actuator1 = new WPI_VictorSPX(5);
-        actuator2 = new WPI_VictorSPX(6);
         door = new Servo(1);
-        light = new Spark(0);
+        //actuator1 = new WPI_VictorSPX(5);
+        //actuator2 = new WPI_VictorSPX(6);
+
         driveL = new SpeedControllerGroup(drive1, drive2);
         driveR = new SpeedControllerGroup(drive3, drive4);
-        nidec1 = new NidecBrushless(9, 9);
 
-        timer = new Timer();
-        CameraServer.getInstance().startAutomaticCapture(0);
-        CameraServer.getInstance().startAutomaticCapture(1);
+        camera1 = CameraServer.getInstance().startAutomaticCapture(0);
+        camera2 = CameraServer.getInstance().startAutomaticCapture(1);
+        camera1.setResolution(1280, 720);
+        camera2.setResolution(1280, 720);
 
         myRobot = new DifferentialDrive(driveL, driveR);
     }
@@ -70,13 +71,12 @@ public class Robot extends IterativeRobot {
 
     @Override
     public void teleopPeriodic(){
-        myRobot.tankDrive(stickL.getY(), stickR.getY());
+        myRobot.tankDrive(-stickL.getY(), stickR.getY());
+
         ramp();
         arms();
-        lifts();
+        //lifts();
         door();
-        light();
-        brushlessMotors();
     }
 
     @Override
@@ -84,15 +84,6 @@ public class Robot extends IterativeRobot {
 
     }
 
-    public void light(){
-        if(stickL.getRawButton(6) && lightOn == false){
-            lightOn = true;
-            light.set(1);
-        }else if(stickL.getRawButton(6) && lightOn == true){
-            light.set(0); 
-            lightOn = false;
-        }
-    }
     public void ramp(){
         if(stickL.getRawButton(5) && !isRampOn){
             isRampOn = true;
@@ -114,6 +105,7 @@ public class Robot extends IterativeRobot {
             arm.set(-2);
         }
     }
+    /*Commented Out Lifts
     public void lifts(){
         if(stickR.getRawButton(5) && !isLiftOpen){
             isLiftOpen = true;
@@ -126,41 +118,32 @@ public class Robot extends IterativeRobot {
             actuator2.set(-3);
         }
     }
+    */
 
     public void door(){
-      if(stickL.getRawButton(4) && !areDoorsOpen){
-        areDoorsOpen = false;
-        door.set(4);
-        timer.start();
-        if(timer.get() > delay){
-          door.set(-1);
-          timer.reset();
-          if(timer.get() > 15){
-            door.set(0);
-            timer.stop();
-          }
-        }
-      }else if(stickL.getRawButton(4) && areDoorsOpen){
-        areDoorsOpen = false;
-        door.set(-4);
-        timer.start();
-        if(timer.get() > delay){
-          door.set(-1);
-          timer.reset();
-          if(timer.get() > 15){
-            door.set(0);
-            timer.stop();
-          }
-        }
-      }
-    }
-
-    public void brushlessMotors(){
-        if(stickR.getRawButton(2)){
-            if(brushlessValue == 0){
-                nidec1.disable();
-            } else {
-                nidec1.set(brushlessValue);
+        if(stickL.getRawButton(4) && !areDoorsOpen){
+            areDoorsOpen = false;
+            door.set(4);
+            timer.start();
+            if(timer.get() > delay){
+                door.set(-1);
+                timer.reset();
+                if(timer.get() > 15){
+                    door.set(0);
+                    timer.stop();
+                }
+            } else if(stickL.getRawButton(4) && areDoorsOpen){
+                areDoorsOpen = false;
+                door.set(-4);
+                timer.start();
+                if(timer.get() > delay){
+                    door.set(-1);
+                    timer.reset();
+                    if(timer.get() > 15){
+                        door.set(0);
+                        timer.stop();
+                    }
+                }
             }
         }
     }
