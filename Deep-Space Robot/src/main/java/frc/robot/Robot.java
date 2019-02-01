@@ -36,6 +36,7 @@ public class Robot extends IterativeRobot {
         areArmsOn = false;
         isLiftOpen = false;
         areDoorsOpen = false;
+        isMainDrive = true;
 
         drive1 = new WPI_TalonSRX(1);
         drive2 = new WPI_TalonSRX(2);
@@ -51,16 +52,15 @@ public class Robot extends IterativeRobot {
 
         timer = new Timer();
         myRobot = new DifferentialDrive(driveL, driveR);
-        myRobotActuator = new DifferentialDrive(ad1, ad2);
-        camera1 = new UsbCamera("cam0", 0);
-        camera2 = new UsbCamera("cam1", 1);
+        myRobotActuator = new DifferentialDrive(ad1, ad2)
+            
+        camera1 = new CameraServer.GetInstance().StartAutomaticCapture(0);
+        camera2 = new CameraServer.GetInstance().StartAutomaticCapture(1);
 
         camera1.setFPS(30);
         camera2.setFPS(30);
         camera1.setResolution(1280,720);
         camera2.setResolution(1280,720);
-        CameraServer.getInstance().startAutomaticCapture(camera1);
-        CameraServer.getInstance().startAutomaticCapture(camera2);
 
 
     }
