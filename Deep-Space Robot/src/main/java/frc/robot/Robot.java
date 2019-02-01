@@ -15,13 +15,14 @@ import edu.wpi.cscore.UsbCamera;
 
 public class Robot extends IterativeRobot {
     private Joystick stickL, stickR;
-    private WPI_TalonSRX drive1, drive2, drive3, drive4;
+    private WPI_TalonSRX drive1, drive2, drive3, drive4, ad1, ad2;
     private WPI_VictorSPX ramp, arm, actuator1, actuator2;
     private Servo door;
     private SpeedControllerGroup driveL, driveR;
-    private DifferentialDrive myRobot;
+    private DifferentialDrive myRobot, myRobotActuator;
     private Timer timer;
     private UsbCamera camera1, camera2;
+    private boolean isMainDrive;
 
     private double delay = 100.0;
     private double brushlessValue;
@@ -50,6 +51,7 @@ public class Robot extends IterativeRobot {
 
         timer = new Timer();
         myRobot = new DifferentialDrive(driveL, driveR);
+        myRobotActuator = new DifferentialDrive(ad1, ad2);
         camera1 = new UsbCamera("cam0", 0);
         camera2 = new UsbCamera("cam1", 1);
 
@@ -74,11 +76,18 @@ public class Robot extends IterativeRobot {
 
     @Override
     public void teleopPeriodic(){
-        myRobot.tankDrive(stickL.getY(), stickR.getY());
+        //myRobot.tankDrive(stickL.getY(), stickR.getY());
         ramp();
         arms();
         lifts();
         door(); 
+        
+        if(stickR.getTrigger() && !isMainDrive) {
+            isMainDrive = false;
+            myRobotActuator.tankDrive(stickL.getY(), stickR.getY());
+        } else if(stickR.getTrigger() && isMainDrive){
+            isMainDrive = true;
+            myRobot.tankDrive(stickL.getY(), stickR.getY());
     }
 
     @Override
