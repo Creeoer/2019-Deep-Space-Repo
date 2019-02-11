@@ -27,6 +27,7 @@ public class Robot extends TimedRobot {
     private UsbCamera camera1, camera2;
     private Potentiometer pot;
     private CameraServer camServer;
+    private double timePassed;
 
     private int currentArmPos;
     private boolean areArmsOn , isLiftOpen;
@@ -55,6 +56,7 @@ public class Robot extends TimedRobot {
         pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
         myRobot = new DifferentialDrive(driveL, driveR);
+        timer = new Timer();
 
         currentArmPos = 1;
         
@@ -74,6 +76,8 @@ public class Robot extends TimedRobot {
         camera2.setFPS(25);
         camera1.setResolution(800, 600);
         camera2.setResolution(800, 600);
+
+        timePassed = timer.get();
     }
 
     @Override
@@ -127,71 +131,58 @@ public class Robot extends TimedRobot {
 
         if(stickR.getRawButton(6)){
             ramp.set(-0.5);
-            Timer.delay(0.38);
 
         }else if(stickR.getRawButton(4)){
             ramp.set(0.5);
-            Timer.delay(0.37);
         } else {
             ramp.set(0);
         }
-
-
-
-        /*
-        if(stickR.getRawButton(6) && !isRampOn){
-            isRampOn = true;
-            ramp.set(1);
-            isRampOn = false;
-        }
-        else if(stickR.getRawButton(4) && !isRampOn){
-            isRampOn = true;
-            ramp.set(-1);
-            isRampOn = false;
-        }else {
-            ramp.set(0);
-
-        }
-
-        */
     }
-
-    /*
-    current times: 
-    1.02
-    0.33
-    0.86
-
-    */
 
     public void arms(){
         if(stickL.getRawButton(3) && !areArmsOn && currentArmPos == 2){
             areArmsOn = true;
             arm.set(10);
-            Timer.delay(0.06);
-            arm.set(0);
+            timer.start();
+            if(timePassed > 0.06){
+                arm.set(0);
+            }
+            timer.stop();
+           // Timer.delay(0.06);
+            //arm.set(0);
             areArmsOn = false;
             currentArmPos = 3;
         } else if(stickL.getRawButton(4) && !areArmsOn && currentArmPos == 1){
             areArmsOn = true; 
-            arm.set(10);       
-            Timer.delay(0.47);
-            arm.set(0);
+            arm.set(10);
+            timer.start();    
+            //.delay(0.47);
+            //arm.set(0);
+            if(timePassed > 0.47){
+                arm.set(0);
+            }
+            timer.stop();
             areArmsOn = false;
             currentArmPos = 2;
         } else if(stickL.getRawButton(2) && !areArmsOn && currentArmPos == 2){        
             areArmsOn = true;    
             arm.set(-10);
-            //.78
-            Timer.delay(0.47);
-            arm.set(0);
+            //Timer.delay(0.47);
+            timer.start();
+            if(timePassed > 0.47){
+                arm.set(0);
+            }
             areArmsOn = false;
             currentArmPos = 1;
         } else if(stickL.getRawButton(5) && !areArmsOn && currentArmPos == 3){
-            arm.set(-10);
             areArmsOn = true;
-            Timer.delay(0.06);
-            arm.set(0);
+            arm.set(-10);
+            timer.start();
+            if(timePassed > 0.06){
+                arm.set(0);
+            }
+            //Timer.delay(0.06);
+            //arm.set(0);
             areArmsOn = false;
             currentArmPos = 2;
         } else {
@@ -221,14 +212,9 @@ public class Robot extends TimedRobot {
         if(currentVoltage == 5 || currentVoltage == 0){
             actuator1.set(0);
             actuator2.set(0);
-
-
         }
     }
 
-    /*
-    Immediately turns on the door motor while enabling
-    */
     public void door(){
         if(stickR.getRawButton(2)) {
             door.set(0.5);  
@@ -236,38 +222,4 @@ public class Robot extends TimedRobot {
             door.set(.96);
         }        
     }
-        /*
-      if(stickL.getRawButton(2) && !areDoorsOpen){
-        door.set(4);
-        
-        Timer.delay(1);
-        door.set(0);
-        areDoorsOpen = true;
-      }else if(stickL.getRawButton(2) && areDoorsOpen){
-        door.set(-4);
-        Timer.delay(1);
-        door.set(0);
-        areDoorsOpen = false;
-
-
-
-    } else {
-          door.set(0);
-      }
-    }
-    */
 }
-
-
-/*
-if(stickR.getRawButton(5)){y  
-      shovel.set(-2);
-      Timer.delay(0.3);
-      shovel.set(0);
-    } else if(stickR.getRawButton(6)){
-      shovel.set(2);
-      Timer.delay(0.3);
-      shovel.set(0);
-    }
-
-*/
