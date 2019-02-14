@@ -40,29 +40,37 @@ public class Robot extends TimedRobot {
 
         areArmsOn = false;
         isLiftOpen = false;
-
+        actuatorEnabled = false;
+        currentArmPos = 1;
+        
+        //Drive Init
         drive1 = new WPI_TalonSRX(1);
         drive2 = new WPI_TalonSRX(2);
         drive3 = new WPI_TalonSRX(3);
         drive4 = new WPI_TalonSRX(4);
+        driveL = new SpeedControllerGroup(drive1, drive2);
+        driveR = new SpeedControllerGroup(drive3, drive4);
+        
+        //Motor Init
         ramp = new WPI_VictorSPX(7);
         arm = new WPI_VictorSPX(8);
         actuator1 = new WPI_VictorSPX(5);
         actuator2 = new WPI_TalonSRX(6);
         actuatorDrive = new WPI_VictorSPX(9);
         door = new Servo(0);
-        driveL = new SpeedControllerGroup(drive1, drive2);
-        driveR = new SpeedControllerGroup(drive3, drive4);
+        
+        //Input Init
         analogInput = new AnalogInput(0);
         pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
-        myRobot = new DifferentialDrive(driveL, driveR);
-        timer = new Timer();
-
-        currentArmPos = 1;
         
+        myRobot = new DifferentialDrive(driveL, driveR);
+        myRobot.setExpiration(0.1);
+        
+        //VARS
         currentVoltage = analogInput.getVoltage();
 
+        //Cameras
         camera1 = CameraServer.getInstance().startAutomaticCapture(0);
         camera2 = CameraServer.getInstance().startAutomaticCapture(1);
 
@@ -70,7 +78,6 @@ public class Robot extends TimedRobot {
         camera2.setFPS(25);
         camera1.setResolution(800, 600);
         camera2.setResolution(800, 600);
-        actuatorEnabled = false;
     }
 
     @Override
@@ -85,12 +92,12 @@ public class Robot extends TimedRobot {
 
         back up robot on half speed
         */
-
-        timer.start();
-        myRobot.arcadeDrive(5, 5);
-        timer.get();
     }
-//14.44 feet 
+    //14.44 feet 
+
+    @Override
+    public void autonomousPeriodic() {
+    }
 
     @Override
     public void teleopPeriodic(){
@@ -101,7 +108,8 @@ public class Robot extends TimedRobot {
         lifts();
         door(); 
         liftDrive();
-
+        
+        //Arm Override
         if(stickL.getRawButton(6)){
             arm.set(2);
         } else if(stickL.getRawButton(7)){
