@@ -28,6 +28,7 @@ public class Robot extends TimedRobot {
     private Potentiometer pot;
     private CameraServer camServer;
     private double timePassed;
+    private boolean actuatorEnabled;
 
     private int currentArmPos;
     private boolean areArmsOn , isLiftOpen;
@@ -62,13 +63,6 @@ public class Robot extends TimedRobot {
         
         currentVoltage = analogInput.getVoltage();
 
-        /*
-        drive1.setSafetyEnabled(false);
-        drive2.setSafetyEnabled(false);
-        drive3.setSafetyEnabled(false);
-        drive4.setSafetyEnabled(false);
-        */
-
         camera1 = CameraServer.getInstance().startAutomaticCapture(0);
         camera2 = CameraServer.getInstance().startAutomaticCapture(1);
 
@@ -76,8 +70,7 @@ public class Robot extends TimedRobot {
         camera2.setFPS(25);
         camera1.setResolution(800, 600);
         camera2.setResolution(800, 600);
-
-        timePassed = timer.get();
+        actuatorEnabled = false;
     }
 
     @Override
@@ -86,10 +79,22 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit(){
+        /*
+        Drive forward 14.44 feet 
+        Lower arm from pos 3 to pos 1 (get time)
+
+        back up robot on half speed
+        */
+
+        timer.start();
+        myRobot.arcadeDrive(5, 5);
+        timer.get();
     }
+//14.44 feet 
 
     @Override
     public void teleopPeriodic(){
+
         myRobot.tankDrive(-stickL.getY(), -stickR.getY());
         ramp();
         arms();
@@ -103,6 +108,17 @@ public class Robot extends TimedRobot {
             arm.set(-2);
         } else {
             arm.set(0);
+        }
+        
+
+        if(stickR.getRawButton(7)) {
+            actuator1.set(8);
+        } else if(stickR.getRawButton(8)){
+            actuator2.set(8);
+        } else if(stickR.getRawButton(12)) {
+            actuator1.set(-5);
+        } else if (stickR.getRawButton(10)) {
+            actuator2.set(-5);
         }
     }
 
@@ -118,9 +134,18 @@ public class Robot extends TimedRobot {
 
     }
 
+    public void useDrive(){
+
+        Timer.delay(10);
+        arm.set(5); 
+    }
+
     public void liftDrive() {
-        if(stickR.getRawButton(1)) {
-            actuatorDrive.set(1);
+
+        if(stickR.getRawButton(11)) {
+            actuatorDrive.set(10);
+        } else if(stickR.getRawButton(12)) {
+            actuatorDrive.set(-10);
         } else {
             actuatorDrive.set(0);
         }
@@ -139,7 +164,10 @@ public class Robot extends TimedRobot {
         }
     }
 
+
+    
     public void arms(){
+
         if(stickL.getRawButton(3) && !areArmsOn && currentArmPos == 2){
             areArmsOn = true;
             arm.set(10);
@@ -148,16 +176,13 @@ public class Robot extends TimedRobot {
                 arm.set(0);
             }
             timer.stop();
-           // Timer.delay(0.06);
-            //arm.set(0);
+           
             areArmsOn = false;
             currentArmPos = 3;
         } else if(stickL.getRawButton(4) && !areArmsOn && currentArmPos == 1){
             areArmsOn = true; 
             arm.set(10);
             timer.start();    
-            //.delay(0.47);
-            //arm.set(0);
             if(timePassed > 0.47){
                 arm.set(0);
             }
@@ -167,7 +192,7 @@ public class Robot extends TimedRobot {
         } else if(stickL.getRawButton(2) && !areArmsOn && currentArmPos == 2){        
             areArmsOn = true;    
             arm.set(-10);
-            //Timer.delay(0.47);
+         
             timer.start();
             if(timePassed > 0.47){
                 arm.set(0);
@@ -181,8 +206,7 @@ public class Robot extends TimedRobot {
             if(timePassed > 0.06){
                 arm.set(0);
             }
-            //Timer.delay(0.06);
-            //arm.set(0);
+         
             areArmsOn = false;
             currentArmPos = 2;
         } else {
@@ -190,17 +214,36 @@ public class Robot extends TimedRobot {
         }
       
     }
+    
 
     public void lifts(){
+
+        
+
+        if(stickR.getRawButton(9)) {
+            actuator1.set(5);
+            actuator2.set(5);
+        }
+
         if(stickR.getRawButton(5) && !isLiftOpen && analogInput.getVoltage() < 5){
-            actuator1.set(3);
-            actuator2.set(3);
+            actuator1.set(5);
+            actuator2.set(0.5);
             isLiftOpen = true;
+/*
+            if(!actuatorEnabled){
+          //      Timer.delay(0.3);
+                actuator2.set(3);
+                actuatorEnabled = true;
+            } else {
+            actuator2.set(3);
+            }
+*/
         }
          else if(stickR.getRawButton(3) && !isLiftOpen && analogInput.getVoltage() > 0){
-            actuator1.set(-3);
+            actuator1.set(-6);
             actuator2.set(-3);
             isLiftOpen = true;
+        
         } else {
             isLiftOpen = false;
             actuator1.set(0);
