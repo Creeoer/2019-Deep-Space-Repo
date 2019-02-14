@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.MotorSafety;
+import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.AnalogGyro;
 
 public class Robot extends TimedRobot {
     private Joystick stickL, stickR;
@@ -26,8 +28,11 @@ public class Robot extends TimedRobot {
     private AnalogInput analogInput;
     private UsbCamera camera1, camera2;
     private Potentiometer pot;
+    private Ultrasonic ultraSensor;
+    private Gyro gyro;
     private CameraServer camServer;
     private double timePassed;
+    private double Kp = 0.03; //Multiplyer for the force of gravity
 
     private int currentArmPos;
     private boolean areArmsOn , isLiftOpen;
@@ -61,7 +66,10 @@ public class Robot extends TimedRobot {
         analogInput = new AnalogInput(0);
         pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
+        ultraSensor.setAutomaticMode(true); 
+        gyro = new AnalogGyro(1);
         
+        //Robot Init and Safety
         myRobot = new DifferentialDrive(driveL, driveR);
         myRobot.setExpiration(0.1);
         
@@ -91,6 +99,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit(){
+        public double distance = ultraSensor.getRangeInches();
+    }
+    
+    @Override
+    public void autonomousPeriodic(){
+        if(distance > 3){
+            myRobot.drive(0.0,0.0);
+        }
     }
 
     @Override
