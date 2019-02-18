@@ -14,11 +14,19 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.Counter;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 
+
+//Limit Switch:
+    //1: DIO 1
+    //2: DIO 2
 public class Robot extends TimedRobot {
     private Joystick stickL, stickR;
     private WPI_TalonSRX drive1, drive2, drive3, drive4, actuator2, actuatorDrive2;
@@ -27,26 +35,24 @@ public class Robot extends TimedRobot {
     private SpeedControllerGroup driveL, driveR, actuatorDrive;
     private DifferentialDrive myRobot;
     private Timer timer;
-    private AnalogInput analogInput;
     private UsbCamera camera1, camera2;
-    private Potentiometer pot;
     private CameraServer camServer;
     private double timePassed;
     private boolean actuatorEnabled;
-    private Encoder encoder;
     private Ultrasonic ultraSensor;
     private Gyro gyro;
+    private Encoder encoder1, encoder2; 
+    //private Potentiometer pot;
+    //private AnalogInput ai;
+    //private Counter counter1, counter2;
+    
 
     private int currentArmPos;
     private boolean areArmsOn , isLiftOpen;
-    private double currentVoltage;
-    private double Kp = 0.03;  //Force of Gravity
-    private double distance;
 
     public void robotInit(){
         stickL = new Joystick(0);
         stickR = new Joystick(1);
-
         areArmsOn = false;
         isLiftOpen = false;
         actuatorEnabled = false;
@@ -72,17 +78,23 @@ public class Robot extends TimedRobot {
         door = new Servo(0);
         
         //Input Init
-        analogInput = new AnalogInput(0);
-        pot = new AnalogPotentiometer(analogInput, 360, 30);
+        //analogInput = new AnalogInput(0);
+        //pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
        // ultraSensor.setAutomaticMode(true);
         gyro = new AnalogGyro(1);
-        
+        //1pot = new AnalogPotentiometer(0, 360, 30);
+        //ai = new AnalogInput(1);
+       // pot = new AnalogPotentiometer(ai, 360, 30);
+        //encoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+    
         myRobot = new DifferentialDrive(driveL, driveR);
         myRobot.setExpiration(0.3);
-        
+        //distance = encoder.getDistance();
+        encoder1.reset();
+        encoder2.reset(); 
         //VARS
-        currentVoltage = analogInput.getVoltage();
+        //degrees = pot.get();
 
         //Cameras
         //camera1 = CameraServer.getInstance().startAutomaticCapture(0);
@@ -93,8 +105,10 @@ public class Robot extends TimedRobot {
         camera1.setResolution(800, 600);
         camera2.setResolution(800, 600);
         */
-        encoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
-        
+       // encoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+       //encoder.reset();
+       //double count = encoder.get();
+       //double distance = encoder.getDistance();
     }
 
     @Override
@@ -109,25 +123,31 @@ public class Robot extends TimedRobot {
 
         back up robot on half speed
         */
+
         //gyro.reset();
     //14.44 feet 
     }
 
     @Override
     public void autonomousPeriodic() {
-        double angle = gyro.getAngle();
         myRobot.arcadeDrive(0.5, -.17); 
     }
 
     @Override
     public void teleopPeriodic(){
+        //John - "The robot will never fall over" 
         myRobot.tankDrive(-stickL.getY(), -stickR.getY());
         ramp();
         arms();
         lifts();
         door(); 
         liftDrive();
-        System.out.println("Encoder:" + encoder.getDistance());
+        System.out.println("Encoder: " + encoder1.getDistance());
+        System.out.println("Per Pulse: " + encoder1.getDistancePerPulse());
+        System.out.println(encoder1);
+        //System.out.println("Encoder: " + encoder.getDistance());
+        //System.out.println("Degrees: " + degrees);
+        //System.out.println("Voltage: " + ai.getVoltage());
         
         //Arm Override
         if(stickL.getRawButton(6)){
@@ -166,12 +186,10 @@ public class Robot extends TimedRobot {
     }
 
     public void ramp(){
-
         if(stickR.getRawButton(6)){
-            ramp.set(-0.5);
-
+            ramp.set(-10);
         }else if(stickR.getRawButton(4)){
-            ramp.set(0.5);
+            ramp.set(10);
         } else {
             ramp.set(0);
         }
@@ -238,17 +256,23 @@ public class Robot extends TimedRobot {
     }
     
     public void lifts(){
-        if(stickR.getRawButton(5) && !isLiftOpen && analogInput.getVoltage() < 5){
+        /*
+        if(isSwitch1Set()){
+            ramp.set(0);
+        }else if(isSwitch2Set()){
+            ramp.set(0);
+        }
+        */
+
+        if(stickR.getRawButton(5) && !isLiftOpen){
             actuator1.set(5);
             actuator2.set(5);
-            System.out.println("Encoder" + analogInput.getAverageVoltage());
             isLiftOpen = true;
         }
-         else if(stickR.getRawButton(3) && !isLiftOpen && analogInput.getVoltage() > 0){
+         else if(stickR.getRawButton(3) && !isLiftOpen){
             actuator1.set(-3);
             actuator2.set(-3.5);
             isLiftOpen = true;
-            System.out.println("Encoder" + analogInput.getAverageVoltage());
          } else if(stickR.getRawButton(9) && !isLiftOpen){
             actuator1.set(3);
          } else if(stickR.getRawButton(10) && !isLiftOpen){
@@ -264,18 +288,15 @@ public class Robot extends TimedRobot {
         }
     }
 
-    public void voltageCheck(){
-        if(currentVoltage == 5 || currentVoltage == 0){
-            actuator1.set(0);
-            actuator2.set(0);
-        }
-    }
-
     public void door(){
         if(stickR.getRawButton(2)) {
-            door.set(0.5);  
+            door.set(0.46);  
         } else {
-            door.set(.96);
+            door.set(.9527);
         }        
     }
-}
+    
+    public void startCompetiton(){
+
+    }
+} 
