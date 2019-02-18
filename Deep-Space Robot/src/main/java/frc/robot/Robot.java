@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.Encoder;
 
 public class Robot extends TimedRobot {
     private Joystick stickL, stickR;
@@ -32,6 +33,7 @@ public class Robot extends TimedRobot {
     private CameraServer camServer;
     private double timePassed;
     private boolean actuatorEnabled;
+    private Encoder encoder;
     private Ultrasonic ultraSensor;
     private Gyro gyro;
 
@@ -74,23 +76,25 @@ public class Robot extends TimedRobot {
         pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
        // ultraSensor.setAutomaticMode(true);
-        //gyro = new AnalogGyro(2);
+        gyro = new AnalogGyro(1);
         
         myRobot = new DifferentialDrive(driveL, driveR);
-        myRobot.setExpiration(0.1);
+        myRobot.setExpiration(0.3);
         
         //VARS
         currentVoltage = analogInput.getVoltage();
-      //  distance = ultraSensor.getRangeInches();
 
         //Cameras
-        camera1 = CameraServer.getInstance().startAutomaticCapture(0);
-        camera2 = CameraServer.getInstance().startAutomaticCapture(1);
-
+        //camera1 = CameraServer.getInstance().startAutomaticCapture(0);
+        //camera2 = CameraServer.getInstance().startAutomaticCapture(1);
+        /*
         camera1.setFPS(25);
         camera2.setFPS(25);
         camera1.setResolution(800, 600);
         camera2.setResolution(800, 600);
+        */
+        encoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+        
     }
 
     @Override
@@ -105,46 +109,33 @@ public class Robot extends TimedRobot {
 
         back up robot on half speed
         */
-        gyro.reset();
-    }
+        //gyro.reset();
     //14.44 feet 
+    }
 
     @Override
     public void autonomousPeriodic() {
-        double angle  = gyro.getAngle();
-        myRobot.arcadeDrive(-1.0, -angle*Kp);
-        Timer.delay(4);
-        myRobot.arcadeDrive(0.0, 0.0); 
+        double angle = gyro.getAngle();
+        myRobot.arcadeDrive(0.5, -.17); 
     }
 
     @Override
     public void teleopPeriodic(){
-
         myRobot.tankDrive(-stickL.getY(), -stickR.getY());
         ramp();
         arms();
         lifts();
         door(); 
         liftDrive();
+        System.out.println("Encoder:" + encoder.getDistance());
         
         //Arm Override
         if(stickL.getRawButton(6)){
-            arm.set(2);
+            arm.set(5);
         } else if(stickL.getRawButton(7)){
-            arm.set(-2); 
+            arm.set(-5); 
         } else {
             arm.set(0);
-        }
-        
-
-        if(stickR.getRawButton(7)) {
-            actuator1.set(8);
-        } else if(stickR.getRawButton(8)){
-            actuator2.set(8);
-        } else if(stickR.getRawButton(12)) {
-            actuator1.set(-5);
-        } else if (stickR.getRawButton(10)) {
-            actuator2.set(-5);
         }
     }
 
@@ -161,17 +152,17 @@ public class Robot extends TimedRobot {
     }
 
     public void liftDrive() {
-
-        if(stickR.getRawButton(7)) {
+/*
+        if(stickL.getRawButton(7)) {
             actuatorDrive1.set(3);
             actuatorDrive2.set(-3);
-        } else if(stickR.getRawButton(8)) {
+        } else if(stickL.getRawButton(8)) {
             actuatorDrive1.set(-3);
             actuatorDrive2.set(3);
         } else {
             actuatorDrive.set(0);
         }
-
+*/
     }
 
     public void ramp(){
@@ -185,34 +176,8 @@ public class Robot extends TimedRobot {
             ramp.set(0);
         }
     }
-
     public void arms(){
-        if(stickL.getRawButton(4) && currentArmPos == 1){
-            arm.set(10);
-            Timer.delay(0.51);
-            arm.set(0);
-            currentArmPos = 2;
-        } else if(stickL.getRawButton(3) && currentArmPos == 2){
-            arm.set(10);
-            Timer.delay(.09);
-            arm.set(0);
-            currentArmPos = 3;
-        } else if(stickL.getRawButton(5) && currentArmPos == 3){
-            arm.set(-10);
-            Timer.delay(.09);
-            arm.set(0);
-            currentArmPos = 2;
-        } else if(stickL.getRawButton(2) && currentArmPos == 2){
-            arm.set(-10);
-            Timer.delay(0.51);
-            arm.set(0);
-            currentArmPos = 1;
-        }
-    }
-
-    /*
-    public void arms(){
-        
+        /*
         if(stickL.getRawButton(3) && !areArmsOn && currentArmPos == 2){
      
             areArmsOn = true;
@@ -235,7 +200,7 @@ public class Robot extends TimedRobot {
             arm.set(-10);
             Timer.delay(0.47);
             arm.set(0);
-            areArmsOn = false;
+            areArmsOn b= false;
             currentArmPos = 1;
         } else if(stickL.getRawButton(5) && !areArmsOn && currentArmPos == 3){
             areArmsOn = true;
@@ -243,35 +208,55 @@ public class Robot extends TimedRobot {
             Timer.delay(0.06);
             arm.set(0);
             areArmsOn = false;
+
             currentArmPos = 2;
         } else {
             arm.set(0);
         }
-      
+        */
+        if(stickL.getRawButton(4) && currentArmPos == 1){
+            arm.set(5);
+            Timer.delay(.44);
+            arm.set(0);
+            currentArmPos = 2;
+        } else if(stickL.getRawButton(3) && currentArmPos == 2){
+            arm.set(5);
+            Timer.delay(.15);
+            arm.set(0);
+            currentArmPos = 3;
+        } else if(stickL.getRawButton(5) && currentArmPos == 3){
+            arm.set(-5);
+            Timer.delay(.15);
+            arm.set(0);
+            currentArmPos = 2;
+        } else if(stickL.getRawButton(2) && currentArmPos == 2){
+            arm.set(-5);
+            Timer.delay(.41);
+            arm.set(0);
+            currentArmPos = 1;
+        }
     }
-    */
     
-
     public void lifts(){
         if(stickR.getRawButton(5) && !isLiftOpen && analogInput.getVoltage() < 5){
             actuator1.set(5);
             actuator2.set(5);
+            System.out.println("Encoder" + analogInput.getAverageVoltage());
             isLiftOpen = true;
-
         }
          else if(stickR.getRawButton(3) && !isLiftOpen && analogInput.getVoltage() > 0){
-            actuator1.set(-6);
+            actuator1.set(-3);
             actuator2.set(-3.5);
             isLiftOpen = true;
-        
-         } else if(stickR.getRawButton(9) && !isLiftOpen && analogInput.getVoltage() < 5){
-            actuator1.set(6);
-         } else if(stickR.getRawButton(10) && !isLiftOpen && analogInput.getVoltage() < 5){
-            actuator2.set(6);
-         } else if(stickR.getRawButton(11) && !isLiftOpen && analogInput.getVoltage() < 0){
-            actuator1.set(-6);
-        } else if(stickR.getRawButton(12) && !isLiftOpen && analogInput.getVoltage() < 0){
-            actuator2.set(-6);
+            System.out.println("Encoder" + analogInput.getAverageVoltage());
+         } else if(stickR.getRawButton(9) && !isLiftOpen){
+            actuator1.set(3);
+         } else if(stickR.getRawButton(10) && !isLiftOpen){
+            actuator2.set(3);
+         } else if(stickR.getRawButton(11) && !isLiftOpen){
+            actuator1.set(-3);
+        } else if(stickR.getRawButton(12) && !isLiftOpen){
+            actuator2.set(-3);
         } else {
             isLiftOpen = false;
             actuator1.set(0);

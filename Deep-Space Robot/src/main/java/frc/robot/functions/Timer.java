@@ -3,9 +3,6 @@ package frc.robot.functions;
 import edu.wpi.first.wpilibj.RobotController;
 
 public class Timer {
-
-
- 
     public static void delay(final double seconds){
         try {
             Thread.sleep((long) (seconds * 1e3));
