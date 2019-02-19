@@ -10,16 +10,8 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Servo;
 import frc.robot.functions.Timer;
 import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
-import edu.wpi.first.wpilibj.interfaces.Potentiometer;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.Ultrasonic;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 
@@ -41,7 +33,8 @@ public class Robot extends TimedRobot {
     private boolean actuatorEnabled;
     private Ultrasonic ultraSensor;
     private Gyro gyro;
-    private Encoder encoder1, encoder2; 
+    private Encoder encoder;
+    private double distance, encoderVal;
     //private Potentiometer pot;
     //private AnalogInput ai;
     //private Counter counter1, counter2;
@@ -74,7 +67,7 @@ public class Robot extends TimedRobot {
         actuatorDrive1 = new WPI_VictorSPX(9);
         actuatorDrive2 = new WPI_TalonSRX(10);
         actuatorDrive = new SpeedControllerGroup(actuatorDrive1, actuatorDrive2);
-
+        
         door = new Servo(0);
         
         //Input Init
@@ -86,19 +79,23 @@ public class Robot extends TimedRobot {
         //1pot = new AnalogPotentiometer(0, 360, 30);
         //ai = new AnalogInput(1);
        // pot = new AnalogPotentiometer(ai, 360, 30);
-        //encoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+        encoder = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
+        encoderVal = encoder.getRaw();
     
         myRobot = new DifferentialDrive(driveL, driveR);
         myRobot.setExpiration(0.3);
-        //distance = encoder.getDistance();
-        encoder1.reset();
-        encoder2.reset(); 
+        distance = encoder.getDistance();
+        encoder.reset(); 
         //VARS
         //degrees = pot.get();
 
         //Cameras
-        //camera1 = CameraServer.getInstance().startAutomaticCapture(0);
-        //camera2 = CameraServer.getInstance().startAutomaticCapture(1);
+        camera1 = CameraServer.getInstance().startAutomaticCapture(0);
+        camera2 = CameraServer.getInstance().startAutomaticCapture(1);
+        camera1.setFPS(15);
+        camera2.setFPS(15);
+        camera1.setResolution(800,600);
+        camera2.setResolution(800, 600);
         /*
         camera1.setFPS(25);
         camera2.setFPS(25);
@@ -142,9 +139,11 @@ public class Robot extends TimedRobot {
         lifts();
         door(); 
         liftDrive();
-        System.out.println("Encoder: " + encoder1.getDistance());
-        System.out.println("Per Pulse: " + encoder1.getDistancePerPulse());
-        System.out.println(encoder1);
+        System.out.println("Encoder: " + distance);
+        System.out.println("Encoder Raw: " + encoderVal);
+
+        //System.out.println("Encoder: " + encoder1.getDistance());
+        //System.out.println("Per Pulse: " + encoder1.getDistancePerPulse());
         //System.out.println("Encoder: " + encoder.getDistance());
         //System.out.println("Degrees: " + degrees);
         //System.out.println("Voltage: " + ai.getVoltage());
@@ -187,9 +186,9 @@ public class Robot extends TimedRobot {
 
     public void ramp(){
         if(stickR.getRawButton(6)){
-            ramp.set(-10);
+            ramp.set(-0.5);
         }else if(stickR.getRawButton(4)){
-            ramp.set(10);
+            ramp.set(0.5);
         } else {
             ramp.set(0);
         }
@@ -292,11 +291,7 @@ public class Robot extends TimedRobot {
         if(stickR.getRawButton(2)) {
             door.set(0.46);  
         } else {
-            door.set(.9527);
+            door.set(.952);
         }        
-    }
-    
-    public void startCompetiton(){
-
     }
 } 
