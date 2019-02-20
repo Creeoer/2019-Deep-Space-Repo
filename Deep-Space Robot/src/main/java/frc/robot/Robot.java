@@ -13,7 +13,10 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.Encoder;
+//import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.interfaces.Potentiometer;
+import edu.wpi.first.wpilibj.MotorSafety;
 
 
 //Limit Switch:
@@ -24,6 +27,7 @@ public class Robot extends TimedRobot {
     private WPI_TalonSRX drive1, drive2, drive3, drive4, actuator2, actuatorDrive2;
     private WPI_VictorSPX ramp, arm, actuator1, actuatorDrive1;
     private Servo door;
+    
     private SpeedControllerGroup driveL, driveR, actuatorDrive;
     private DifferentialDrive myRobot;
     private Timer timer;
@@ -31,11 +35,12 @@ public class Robot extends TimedRobot {
     private CameraServer camServer;
     private double timePassed;
     private boolean actuatorEnabled;
-    private Ultrasonic ultraSensor;
     private Gyro gyro;
-    private Encoder encoder;
-    private double distance, encoderVal;
-    //private Potentiometer pot;
+    //private Encoder encoder;
+    private double range;
+    private Potentiometer pot;
+    private AnalogInput echoLocation;
+    private double VOLTS_TO_DIST;
     //private AnalogInput ai;
     //private Counter counter1, counter2;
     
@@ -69,33 +74,33 @@ public class Robot extends TimedRobot {
         actuatorDrive = new SpeedControllerGroup(actuatorDrive1, actuatorDrive2);
         
         door = new Servo(0);
+        echoLocation = new AnalogInput(3);
         
         //Input Init
-        //analogInput = new AnalogInput(0);
-        //pot = new AnalogPotentiometer(analogInput, 360, 30);
+  //      analogInput = new AnalogInput(0);
+  //      pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
        // ultraSensor.setAutomaticMode(true);
         gyro = new AnalogGyro(1);
+        //NEED TO DO MATH
+        VOLTS_TO_DIST = 1;
         //1pot = new AnalogPotentiometer(0, 360, 30);
         //ai = new AnalogInput(1);
        // pot = new AnalogPotentiometer(ai, 360, 30);
-        encoder = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
-        encoderVal = encoder.getRaw();
+        //encoder = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
+        //encoderVal = encoder.getRaw();
+
+
     
         myRobot = new DifferentialDrive(driveL, driveR);
-        myRobot.setExpiration(0.3);
-        distance = encoder.getDistance();
-        encoder.reset(); 
+        drive1.setSafetyEnabled(false);
+        drive2.setSafetyEnabled(false);
+        drive3.setSafetyEnabled(false);
+        drive4.setSafetyEnabled(false);
+        //distance = encoder.getDistance();
+        //encoder.reset(); 
         //VARS
         //degrees = pot.get();
-
-        //Cameras
-        camera1 = CameraServer.getInstance().startAutomaticCapture(0);
-        camera2 = CameraServer.getInstance().startAutomaticCapture(1);
-        camera1.setFPS(15);
-        camera2.setFPS(15);
-        camera1.setResolution(800,600);
-        camera2.setResolution(800, 600);
         /*
         camera1.setFPS(25);
         camera2.setFPS(25);
@@ -122,40 +127,35 @@ public class Robot extends TimedRobot {
         */
 
         //gyro.reset();
-    //14.44 feet 
+        myRobot.arcadeDrive(.58, -.17);
+        Timer.delay(4.44);
+        myRobot.arcadeDrive(0, 0);
     }
 
     @Override
     public void autonomousPeriodic() {
-        myRobot.arcadeDrive(0.5, -.17); 
+        /*
+        Timer.delay(0.5);
+        arm.set(5);
+        Timer.delay(0.59);
+        arm.set(0);
+        myRobot.arcadeDrive(0.5, -0.17);
+        */
     }
 
     @Override
     public void teleopPeriodic(){
-        //John - "The robot will never fall over" 
+        //Jon - "The robot will never fall over" 
         myRobot.tankDrive(-stickL.getY(), -stickR.getY());
         ramp();
         arms();
         lifts();
         door(); 
         liftDrive();
-        System.out.println("Encoder: " + distance);
-        System.out.println("Encoder Raw: " + encoderVal);
-
-        //System.out.println("Encoder: " + encoder1.getDistance());
-        //System.out.println("Per Pulse: " + encoder1.getDistancePerPulse());
-        //System.out.println("Encoder: " + encoder.getDistance());
-        //System.out.println("Degrees: " + degrees);
-        //System.out.println("Voltage: " + ai.getVoltage());
+        System.out.println("Distance[VOLTS]: " + getVoltage());
+        System.out.println("Distance[INCHES]: " + getDistance());
         
         //Arm Override
-        if(stickL.getRawButton(6)){
-            arm.set(5);
-        } else if(stickL.getRawButton(7)){
-            arm.set(-5); 
-        } else {
-            arm.set(0);
-        }
     }
 
     /*
@@ -170,18 +170,25 @@ public class Robot extends TimedRobot {
 
     }
 
+    public double getVoltage(){
+        return echoLocation.getVoltage();
+    }
+
+    public double getDistance(){
+        return getVoltage() * VOLTS_TO_DIST;
+    }
+
     public void liftDrive() {
-/*
-        if(stickL.getRawButton(7)) {
-            actuatorDrive1.set(3);
-            actuatorDrive2.set(-3);
-        } else if(stickL.getRawButton(8)) {
-            actuatorDrive1.set(-3);
-            actuatorDrive2.set(3);
+        if(stickR.getRawButton(8)) {
+            actuatorDrive1.set(6);
+            actuatorDrive2.set(6);
+        } else if(stickR.getRawButton(7)) {
+            actuatorDrive1.set(-6);
+            actuatorDrive2.set(-6);
         } else {
             actuatorDrive.set(0);
         }
-*/
+
     }
 
     public void ramp(){
@@ -194,46 +201,9 @@ public class Robot extends TimedRobot {
         }
     }
     public void arms(){
-        /*
-        if(stickL.getRawButton(3) && !areArmsOn && currentArmPos == 2){
-     
-            areArmsOn = true;
-            arm.set(10);
-            Timer.delay(0.06);
-            arm.set(0);
-            areArmsOn = false;
-            currentArmPos = 3;
-        } else if(stickL.getRawButton(4) && !areArmsOn && currentArmPos == 1){
-         
-            areArmsOn = true; 
-            arm.set(10);
-            Timer.delay(0.47);
-            arm.set(0);
-            areArmsOn = false;
-            currentArmPos = 2;
-        } else if(stickL.getRawButton(2) && !areArmsOn && currentArmPos == 2){   
-     
-            areArmsOn = true;    
-            arm.set(-10);
-            Timer.delay(0.47);
-            arm.set(0);
-            areArmsOn b= false;
-            currentArmPos = 1;
-        } else if(stickL.getRawButton(5) && !areArmsOn && currentArmPos == 3){
-            areArmsOn = true;
-            arm.set(-10);
-            Timer.delay(0.06);
-            arm.set(0);
-            areArmsOn = false;
-
-            currentArmPos = 2;
-        } else {
-            arm.set(0);
-        }
-        */
         if(stickL.getRawButton(4) && currentArmPos == 1){
             arm.set(5);
-            Timer.delay(.44);
+            Timer.delay(.46);
             arm.set(0);
             currentArmPos = 2;
         } else if(stickL.getRawButton(3) && currentArmPos == 2){
@@ -248,9 +218,19 @@ public class Robot extends TimedRobot {
             currentArmPos = 2;
         } else if(stickL.getRawButton(2) && currentArmPos == 2){
             arm.set(-5);
-            Timer.delay(.41);
+            Timer.delay(.46);
             arm.set(0);
             currentArmPos = 1;
+        }
+
+        if(stickL.getRawButton(8)){
+            System.out.println("F O R T N I T E");
+            arm.set(5);
+        } else if(stickL.getRawButton(9)){
+            System.out.println("BYE F o r t n i t e");
+            arm.set(-5); 
+        } else {
+            arm.set(0);
         }
     }
     
@@ -270,7 +250,7 @@ public class Robot extends TimedRobot {
         }
          else if(stickR.getRawButton(3) && !isLiftOpen){
             actuator1.set(-3);
-            actuator2.set(-3.5);
+            actuator2.set(-3);
             isLiftOpen = true;
          } else if(stickR.getRawButton(9) && !isLiftOpen){
             actuator1.set(3);
@@ -291,7 +271,7 @@ public class Robot extends TimedRobot {
         if(stickR.getRawButton(2)) {
             door.set(0.46);  
         } else {
-            door.set(.952);
+            door.set(.944);
         }        
     }
 } 
