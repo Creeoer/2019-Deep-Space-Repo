@@ -42,10 +42,11 @@ public class Robot extends TimedRobot {
     //private AnalogInput ai;
     //private Counter counter1, counter
     
-    private Ultrasonic ultra;
+    private AnalogInput ultra;
 
     private int currentArmPos;
     private boolean areArmsOn , isLiftOpen;
+    private int ultraVolt;
 
     public void robotInit(){
         stickL = new Joystick(0);
@@ -78,20 +79,14 @@ public class Robot extends TimedRobot {
   //      analogInput = new AnalogInput(0);
   //      pot = new AnalogPotentiometer(analogInput, 360, 30);
         timer = new Timer();
+        ultra = new AnalogInput(3);
        // ultraSensor.setAutomaticMode(true);
-        gyro = new AnalogGyro(1);
         //NEED TO DO MATH
-        VOLTS_TO_DIST = 1;
         //1pot = new AnalogPotentiometer(0, 360, 30);
         //ai = new AnalogInput(1);
        // pot = new AnalogPotentiometer(ai, 360, 30);
         //encoder = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
         //encoderVal = encoder.getRaw()
-        
-        
-        ultra = new Ultrasonic(1, 0);
-        ultra.setEnabled(true);
-        ultra.setAutomaticMode(true);
 
 
     
@@ -100,6 +95,9 @@ public class Robot extends TimedRobot {
         drive2.setSafetyEnabled(false);
         drive3.setSafetyEnabled(false);
         drive4.setSafetyEnabled(false);
+        
+
+        ultraVolt = ultra.getValue();
         //distance = encoder.getDistance();
         //encoder.reset(); 
         //VARS
@@ -122,17 +120,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit(){
-        /*
-        Drive forward 14.44 feet 
-        Lower arm from pos 3 to pos 1 (get time)
-
-        back up robot on half speed
-        */
-
-        //gyro.reset();
-        myRobot.arcadeDrive(.58, -.17);
-        Timer.delay(4.44);
-        myRobot.arcadeDrive(0, 0);
+        myRobot.tankDrive(-stickL.getY(), -stickR.getY());
+        ramp();
+        arms();
+        //lifts();
+        door(); 
+        //liftDrive();
     }
 
     @Override
@@ -152,10 +145,10 @@ public class Robot extends TimedRobot {
         myRobot.tankDrive(-stickL.getY(), -stickR.getY());
         ramp();
         arms();
-        lifts();
+        //lifts();
         door(); 
-        liftDrive();
-        System.out.printLn("Inches: " + ultra.getRangeInches();
+        //dliftDrive();
+        //System.out.println("UltraVolt: " + ultraVolt);
         
         //Arm Override
     }
@@ -170,15 +163,7 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic(){
 
-    }
-
-    public double getVoltage(){
-        return echoLocation.getVoltage();
-    }
-
-    public double getDistance(){
-        return getVoltage() * VOLTS_TO_DIST;
-    }
+    } 
 
     public void liftDrive() {
         if(stickR.getRawButton(8)) {
@@ -224,18 +209,8 @@ public class Robot extends TimedRobot {
             arm.set(0);
             currentArmPos = 1;
         }
-
-        if(stickL.getRawButton(8)){
-            System.out.println("F O R T N I T E");
-            arm.set(5);
-        } else if(stickL.getRawButton(9)){
-            System.out.println("BYE F o r t n i t e");
-            arm.set(-5); 
-        } else {
-            arm.set(0);
-        }
     }
-    
+    /*
     public void lifts(){
         /*
         if(isSwitch1Set()){
@@ -243,7 +218,6 @@ public class Robot extends TimedRobot {
         }else if(isSwitch2Set()){
             ramp.set(0);
         }
-        */
 
         if(stickR.getRawButton(5) && !isLiftOpen){
             actuator1.set(5);
@@ -268,12 +242,12 @@ public class Robot extends TimedRobot {
             actuator2.set(0);
         }
     }
-
+    */
     public void door(){
         if(stickR.getRawButton(2)) {
             door.set(0.46);  
         } else {
-            door.set(.944);
+            door.set(.952);
         }        
     }
 } 
