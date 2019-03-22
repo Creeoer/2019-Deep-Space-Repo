@@ -36,14 +36,13 @@ public class Robot extends TimedRobot {
     private double timePassed;
     private boolean actuatorEnabled;
     private Gyro gyro;
-    //private Encoder encoder;
+    //private Encoder encoder
     private double range;
-    private Potentiometer pot;
-    private AnalogInput echoLocation;
     private double VOLTS_TO_DIST;
     //private AnalogInput ai;
-    //private Counter counter1, counter2;
+    //private Counter counter1, counter
     
+    private Ultrasonic ultra;
 
     private int currentArmPos;
     private boolean areArmsOn , isLiftOpen;
@@ -74,7 +73,6 @@ public class Robot extends TimedRobot {
         actuatorDrive = new SpeedControllerGroup(actuatorDrive1, actuatorDrive2);
         
         door = new Servo(0);
-        echoLocation = new AnalogInput(3);
         
         //Input Init
   //      analogInput = new AnalogInput(0);
@@ -88,7 +86,12 @@ public class Robot extends TimedRobot {
         //ai = new AnalogInput(1);
        // pot = new AnalogPotentiometer(ai, 360, 30);
         //encoder = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
-        //encoderVal = encoder.getRaw();
+        //encoderVal = encoder.getRaw()
+        
+        
+        ultra = new Ultrasonic(1, 0);
+        ultra.setEnabled(true);
+        ultra.setAutomaticMode(true);
 
 
     
@@ -152,8 +155,7 @@ public class Robot extends TimedRobot {
         lifts();
         door(); 
         liftDrive();
-        System.out.println("Distance[VOLTS]: " + getVoltage());
-        System.out.println("Distance[INCHES]: " + getDistance());
+        System.out.printLn("Inches: " + ultra.getRangeInches();
         
         //Arm Override
     }
